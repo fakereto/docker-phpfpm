@@ -13,5 +13,5 @@ This repo, is bases in ubuntu Xenial 16.04 base image
 	 - php-fpm.conf: fpm configuration file
 
 You can extend this image like you desire. 
-Please you can send me a message on my gihub channel.
+Please you can send me a message on my github channel: https://github.com/fakereto
 
