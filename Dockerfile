@@ -36,7 +36,11 @@ RUN \
     php7.3-cli php7.3-readline php7.3-mbstring \
     php7.3-zip php7.3-intl php7.3-json php7.3-xml \
     php7.3-curl php7.3-gd php7.3-mysql \
-    php7.3-bcmath php7.3-ctype php7.3-pdo php7.3-mongodb php7.3-redis php-pear unzip\
+    php7.3-bcmath php7.3-ctype php7.3-pdo php7.3-mongodb php7.3-redis php-pear \
+    apt-transport-https \
+    ca-certificates \
+    openssh-client \
+    unzip zip git gnupg2 \
     && phpenmod mcrypt \
     # Install composer
     && curl -sS https://getcomposer.org/installer | php -- --version=1.9.0 --install-dir=/usr/local/bin --filename=composer \
@@ -57,8 +61,8 @@ WORKDIR /var/www
 EXPOSE 9000
 VOLUME ["${PHP_RUN_DIR}", "${PHP_DATA_DIR}"]
 
-COPY entrypoint.sh /var/www/
-ENTRYPOINT ["/var/www/entrypoint.sh"]
+COPY docker-phpfpm-entrypoint.sh /var/www/
+ENTRYPOINT ["/var/www/docker-phpfpm-entrypoint.sh"]
 # PHP_DATA_DIR store sessions
 
 CMD ["/usr/sbin/php-fpm7.3"]
