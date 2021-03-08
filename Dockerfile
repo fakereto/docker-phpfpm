@@ -1,9 +1,10 @@
-FROM ubuntu:bionic
-LABEL maintainer="Andres Vejar <andresvejar@neubox.net>"
+FROM debian:buster-slim
+LABEL maintainer="Andres Vejar <fakereto@gmail.com>"
 
 ENV OS_LOCALE="en_US.UTF-8" \
     DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y locales && locale-gen ${OS_LOCALE}
+RUN apt-get update && apt-get install -y locales gnupg \
+    && locale-gen ${OS_LOCALE}
 ENV LANG=${OS_LOCALE} \
     LANGUAGE=${OS_LOCALE} \
     LC_ALL=${OS_LOCALE}
@@ -29,7 +30,9 @@ RUN \
     && dpkg-reconfigure locales \
     # Install common libraries
     && apt-get install --no-install-recommends -y $BUILD_DEPS \
-    && add-apt-repository -y ppa:ondrej/php \
+        lsb-release apt-transport-https ca-certificates wget \
+    && wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg \
+    && echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list \
     && apt-get update --fix-missing \
     # Install PHP libraries
     && apt-get install -y curl php7.3-fpm \
@@ -37,13 +40,11 @@ RUN \
     php7.3-zip php7.3-intl php7.3-json php7.3-xml \
     php7.3-curl php7.3-gd php7.3-mysql \
     php7.3-bcmath php7.3-ctype php7.3-pdo php7.3-mongodb php7.3-redis php-pear \
-    apt-transport-https \
-    ca-certificates \
     openssh-client \
-    unzip zip git gnupg2 \
+    unzip zip git \
     && phpenmod mcrypt \
     # Install composer
-    && curl -sS https://getcomposer.org/installer | php -- --version=1.9.0 --install-dir=/usr/local/bin --filename=composer \
+    && curl -sS https://getcomposer.org/installer | php -- --version=2.0.8 --install-dir=/usr/local/bin --filename=composer \
     && mkdir -p ${PHP_LOG_DIR} ${PHP_RUN_DIR} \
     # Cleaning
     && apt-get purge -y --auto-remove $BUILD_DEPS \
@@ -61,6 +62,7 @@ WORKDIR /var/www
 EXPOSE 9000
 VOLUME ["${PHP_RUN_DIR}", "${PHP_DATA_DIR}"]
 
+COPY libsh/base.sh /var/www/
 COPY docker-phpfpm-entrypoint.sh /var/www/
 ENTRYPOINT ["/var/www/docker-phpfpm-entrypoint.sh"]
 # PHP_DATA_DIR store sessions
